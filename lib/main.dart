@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'login_view.dart';
+import 'auth/auth_repository.dart';
+import 'auth/login/login_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +14,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoginView(),
+      debugShowCheckedModeBanner: false,
+      title: 'Social Media App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: RepositoryProvider(
+        create: (context) => AuthRepository(),
+        child: LoginView(),
+      ),
     );
   }
 }
