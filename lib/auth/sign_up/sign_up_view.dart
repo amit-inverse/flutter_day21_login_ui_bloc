@@ -4,35 +4,35 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../auth_cubit.dart';
 import '../auth_repository.dart';
 import '../form_submission_status.dart';
-import 'login_bloc.dart';
-import 'login_event.dart';
-import 'login_state.dart';
+import 'sign_up_bloc.dart';
+import 'sign_up_event.dart';
+import 'sign_up_state.dart';
 
-class LoginView extends StatelessWidget {
-  LoginView({super.key});
+class SignUpView extends StatelessWidget {
+  SignUpView({super.key});
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => LoginBloc(
+        create: (context) => SignUpBloc(
           authRepos: context.read<AuthRepository>(),
           authCubit: context.read<AuthCubit>(),
         ),
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            _loginForm(),
-            _showSignUpButton(context),
+            _signupForm(),
+            _showLoginButton(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _loginForm() {
-    return BlocListener<LoginBloc, LoginState>(
+  Widget _signupForm() {
+    return BlocListener<SignUpBloc, SignUpState>(
       listener: (context, state) {
         final formStatus = state.formStatus;
         if (formStatus is SubmissionFailure) {
@@ -47,11 +47,12 @@ class LoginView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _usernameField(),
+              _emailField(),
               _passwordField(),
               const SizedBox(
                 height: 20,
               ),
-              _loginButton(),
+              _signupButton(),
             ],
           ),
         ),
@@ -60,7 +61,7 @@ class LoginView extends StatelessWidget {
   }
 
   Widget _usernameField() {
-    return BlocBuilder<LoginBloc, LoginState>(
+    return BlocBuilder<SignUpBloc, SignUpState>(
       builder: (context, state) {
         return TextFormField(
           decoration: const InputDecoration(
@@ -69,8 +70,26 @@ class LoginView extends StatelessWidget {
           ),
           validator: (value) =>
               state.isValidUsername ? null : 'Username is too short',
-          onChanged: (value) => context.read<LoginBloc>().add(
-                LoginUsernameChanged(username: value),
+          onChanged: (value) => context.read<SignUpBloc>().add(
+                SignUpUsernameChanged(username: value),
+              ),
+        );
+      },
+    );
+  }
+
+  Widget _emailField() {
+    return BlocBuilder<SignUpBloc, SignUpState>(
+      builder: (context, state) {
+        return TextFormField(
+          decoration: const InputDecoration(
+            icon: Icon(Icons.person),
+            hintText: 'Email',
+          ),
+          validator: (value) =>
+              state.isValidUsername ? null : 'Invalid email',
+          onChanged: (value) => context.read<SignUpBloc>().add(
+                SignUpEmailChanged(email: value),
               ),
         );
       },
@@ -78,7 +97,7 @@ class LoginView extends StatelessWidget {
   }
 
   Widget _passwordField() {
-    return BlocBuilder<LoginBloc, LoginState>(
+    return BlocBuilder<SignUpBloc, SignUpState>(
       builder: (context, state) {
         return TextFormField(
           obscureText: true,
@@ -88,36 +107,36 @@ class LoginView extends StatelessWidget {
           ),
           validator: (value) =>
               state.isValidPassword ? null : 'Password is too short',
-          onChanged: (value) => context.read<LoginBloc>().add(
-                LoginPasswordChanged(password: value),
+          onChanged: (value) => context.read<SignUpBloc>().add(
+                SignUpPasswordChanged(password: value),
               ),
         );
       },
     );
   }
 
-  Widget _loginButton() {
-    return BlocBuilder<LoginBloc, LoginState>(
+  Widget _signupButton() {
+    return BlocBuilder<SignUpBloc, SignUpState>(
       builder: (context, state) {
         return state.formStatus is FormSubmitting
             ? const CircularProgressIndicator()
             : ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    context.read<LoginBloc>().add(LoginSubmitted());
+                    context.read<SignUpBloc>().add(SignUpSubmitted());
                   }
                 },
-                child: const Text('Login'),
+                child: const Text('Sign Up'),
               );
       },
     );
   }
 
-  Widget _showSignUpButton(BuildContext context) {
+  Widget _showLoginButton(BuildContext context) {
     return SafeArea(
       child: TextButton(
-        child: const Text('Don\'t have an account? Sign up.'),
-        onPressed: () => context.read<AuthCubit>().showSignUp(),
+        child: const Text('Already have an account? Sign in.'),
+        onPressed: () => context.read<AuthCubit>().showLogin(),
       ),
     );
   }

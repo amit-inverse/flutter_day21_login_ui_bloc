@@ -1,39 +1,45 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../auth_credentials.dart';
 import '../auth_cubit.dart';
 import '../form_submission_status.dart';
 import '../auth_repository.dart';
-import 'login_event.dart';
-import 'login_state.dart';
+import 'sign_up_event.dart';
+import 'sign_up_state.dart';
 
-class LoginBloc extends Bloc<LoginEvent, LoginState> {
+class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final AuthRepository authRepos;
   final AuthCubit? authCubit;
 
-  LoginBloc({required this.authRepos, this.authCubit}) : super(LoginState()) {
-    on<LoginUsernameChanged>((event, emit) {
+  SignUpBloc({required this.authRepos, this.authCubit})
+      : super(SignUpState()) {
+    on<SignUpUsernameChanged>((event, emit) {
       emit(state.copyWith(username: event.username));
     });
 
-    on<LoginPasswordChanged>((event, emit) {
+    on<SignUpEmailChanged>((event, emit) {
+      emit(state.copyWith(email: event.email));
+    });
+
+    on<SignUpPasswordChanged>((event, emit) {
       emit(state.copyWith(password: event.password));
     });
 
-    on<LoginSubmitted>((event, emit) async {
+    on<SignUpSubmitted>((event, emit) async {
       emit(state.copyWith(formStatus: FormSubmitting()));
 
       try {
-        final userId = await authRepos.login(
+        await authRepos.signUp(
           username: state.username,
+          email: state.email,
           password: state.password,
         );
         emit(state.copyWith(formStatus: SubmissionSuccess()));
 
-        authCubit!.launchSession(AuthCredentials(
+        authCubit!.showConfirmSignUp(
           username: state.username,
-          userId: userId,
-        ));
+          email: state.email,
+          password: state.password,
+        );
       } catch (e) {
         emit(state.copyWith(
             formStatus: SubmissionFailure(
